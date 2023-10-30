@@ -32,7 +32,7 @@ public class LocationController {
 		//Thread.sleep(2000);
 		return lDTO;
 	}
-	
+	 
 	@MessageMapping("/updateSourceOut")
 	public LocationDTO updateSourceOut(LocationDTO lDTO){
 		System.out.println("data updating");
@@ -42,7 +42,7 @@ public class LocationController {
 		UtilityImpl utility= new UtilityImpl();
 		utility.setSourceOutInDB(lDTO);
 		//Thread.sleep(2000);
-		return lDTO; 
+		return lDTO;  
 	} 
 	 
 	@MessageMapping("/updateDestinationIn")
@@ -65,6 +65,18 @@ public class LocationController {
 		 
 		UtilityImpl utility= new UtilityImpl();
 		utility.setPolygonVerticsInDB(lDTO);
+		//Thread.sleep(2000);
+		return lDTO;
+	}
+	
+	@MessageMapping("/insertDepotIntoDB") 
+	public LocationDTO insertDepotIntoDB(LocationDTO lDTO){
+		System.out.println("Depot insert into DB");
+		
+		System.out.println(lDTO);
+		 
+		UtilityImpl utility= new UtilityImpl();
+		utility.setDepotIntoDB(lDTO);
 		//Thread.sleep(2000);
 		return lDTO;
 	}

@@ -43,7 +43,7 @@ public class UtilityImpl {
 	
 		 try (Connection connection = DBConnection.getConnection();
 				   PreparedStatement statement = 
-				   connection.prepareStatement("UPDATE VEHICLE SET SourceOut = ? WHERE rego = ?")) {
+				   connection.prepareStatement("UPDATE VEHICLE SET SourceOut = ? WHERE ID = ?")) {
 				  statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 				  statement.setString(2, lDTO.getId());
 				  statement.executeUpdate();
@@ -59,8 +59,8 @@ public class UtilityImpl {
 		// TODO Auto-generated method stub
 	
 		 try (Connection connection = DBConnection.getConnection();
-				   PreparedStatement statement = 
-				   connection.prepareStatement("UPDATE VEHICLE SET DestinationIn = ? WHERE rego = ?")) {
+				  PreparedStatement statement = 
+				  connection.prepareStatement("UPDATE VEHICLE SET DestinationIn = ? WHERE ID = ?")) {
 				  statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 				  statement.setString(2, lDTO.getId());
 				  statement.executeUpdate();
@@ -158,6 +158,71 @@ public class UtilityImpl {
 					  statement.setInt(9, lDTO.getZoneID());
 					  statement.setString(10, "NULL");
 					  statement.executeUpdate();
+					 } catch (SQLException ex) {
+					  ex.printStackTrace();
+					 } catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	 }
+	  
+	  public void setDepotIntoDB(LocationDTO lDTO) {
+			// TODO Auto-generated method stub
+		 
+			 try (Connection connection = DBConnection.getConnection();
+					   PreparedStatement statement = 
+					   connection.prepareStatement("INSERT INTO DEPOT(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius) VALUES(?,?,?,?,?,?,?,?)")) {
+					  //statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
+				 
+					   PreparedStatement IDStatement = connection.prepareStatement("SELECT NEXT VALUE FOR BAS_IDGEN_SEQ");
+				       // Execute the query and retrieve the result
+				       ResultSet resultSet =  IDStatement.executeQuery();
+		
+				       // Get the maximum ID
+				       int maxId = 0;
+				       if (resultSet.next()) {
+				              maxId = resultSet.getInt(1);
+				       }
+				      statement.setInt(1, maxId);
+					  statement.setString(2, "1");
+					  statement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+					  statement.setString(4, lDTO.getDepotName());
+					  statement.setString(5, "MGeoLocation");
+					  statement.setString(6, "1");
+					  statement.setString(7, "NULL");
+					  statement.setString(8, lDTO.getDepotRadius());
+					  
+					  statement.executeUpdate();
+					  
+					  PreparedStatement locationIDStatement = connection.prepareStatement("SELECT NEXT VALUE FOR BAS_IDGEN_SEQ");
+				       // Execute the query and retrieve the result
+				      ResultSet locationIDResultSet =  locationIDStatement.executeQuery();
+				      
+				      // Get the locationID
+				      int locationID = 0;
+				      if (locationIDResultSet.next()) {
+				    	  locationID = locationIDResultSet.getInt(1);
+				      }
+				      
+				      PreparedStatement mgeoLocationStatement = connection.prepareStatement("INSERT INTO MGEOLOCATION(ID, BASVERSION, BASTIMESTAMP, WATCHID, Latitude, Longitude) VALUES(?,?,?,?,?,?)");
+					  
+				      mgeoLocationStatement.setInt(1, locationID);
+				      mgeoLocationStatement.setString(2, "1");
+				      mgeoLocationStatement.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
+				      mgeoLocationStatement.setString(4, "0");
+				      mgeoLocationStatement.setString(5, lDTO.getDepotLat());
+				      mgeoLocationStatement.setString(6, lDTO.getDepotLng());
+					  
+					  
+				      mgeoLocationStatement.executeUpdate();
+				      
+				      PreparedStatement updateDepotLocationRIDStatement = connection.prepareStatement("UPDATE DEPOT SET LOCATION_RID = ? WHERE ID = ?");
+					  
+				      updateDepotLocationRIDStatement.setInt(1, locationID);
+				      updateDepotLocationRIDStatement.setInt(2, maxId);				     
+					  
+				      updateDepotLocationRIDStatement.executeUpdate();
+					  
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
 					 } catch (ClassNotFoundException e) {

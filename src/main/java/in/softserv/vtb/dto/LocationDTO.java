@@ -5,7 +5,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
- 
+  
 @Data
 public class LocationDTO {
 
@@ -21,6 +21,10 @@ public class LocationDTO {
 	private int zoneID;  
 	private int depotID; 
 	private String  isEntry;   
+	private String depotLat;
+	private String depotLng;
+	private String depotName;
+	private String depotRadius;
 	    
 	  
 }

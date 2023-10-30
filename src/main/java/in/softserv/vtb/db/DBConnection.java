@@ -7,7 +7,7 @@ import java.sql.SQLException;
 
 
 public class DBConnection {
-	
+	 
 	
     
     public static Connection getConnection() throws ClassNotFoundException, SQLException {
@@ -16,7 +16,7 @@ public class DBConnection {
         return con;
     }
       
-      
+       
 	
 	public static void main(String[] args) throws Exception
     {        
