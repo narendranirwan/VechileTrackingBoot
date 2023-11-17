@@ -16,6 +16,9 @@ public class LocationController {
 	public LocationDTO updateLoc(LocationDTO lDTO) throws InterruptedException {
 		System.out.println("before sleep");
 		System.out.println(lDTO);
+		UtilityImpl utility= new UtilityImpl();
+		utility.updateVehicleLatLongInDB(lDTO);
+		//utility.setSourceOutDestinationInDB(lDTO);
 		//Thread.sleep(2000);
 		return lDTO;
 	}
@@ -77,6 +80,18 @@ public class LocationController {
 		 
 		UtilityImpl utility= new UtilityImpl();
 		utility.setDepotIntoDB(lDTO);
+		//Thread.sleep(2000);
+		return lDTO;
+	}
+	
+	@MessageMapping("/insertDepotIntoDBPolygon") 
+	public LocationDTO insertDepotIntoDBPolygon(LocationDTO lDTO){
+		System.out.println("Depot insert into DB As a PloyGon");
+		
+		System.out.println(lDTO);
+		 
+		UtilityImpl utility= new UtilityImpl();
+		utility.setDepotIntoDBAsPloygon(lDTO);
 		//Thread.sleep(2000);
 		return lDTO;
 	}
