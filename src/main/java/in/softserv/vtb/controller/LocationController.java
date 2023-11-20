@@ -18,7 +18,7 @@ public class LocationController {
 		System.out.println(lDTO);
 		UtilityImpl utility= new UtilityImpl();
 		utility.updateVehicleLatLongInDB(lDTO);
-		//utility.setSourceOutDestinationInDB(lDTO);
+		utility.setSourceOutDestinationInDB(lDTO);
 		//Thread.sleep(2000);
 		return lDTO;
 	}
@@ -130,6 +130,11 @@ public class LocationController {
 		utility.setEntryInDepotInDB(lDTO); 
 		//Thread.sleep(2000);
 		return lDTO;
-	}  
+	}
+	
+	
+	
+	
+	
 	
 }

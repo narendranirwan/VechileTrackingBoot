@@ -435,6 +435,7 @@ public class UtilityImpl {
 		    } 
 		  
 		  
+		  
 		  public void setSourceOutDestinationInDB(LocationDTO lDTO) {
 			  System.out.println("IN BACKEND====>"); 
 			  try (Connection connection = DBConnection.getConnection();
@@ -458,16 +459,24 @@ public class UtilityImpl {
 			        	  System.out.println("srcLng==>"+srcLng);
 			        	  System.out.println("srcRadius"+srcRadius);
 			          }
+			          			     
+			          boolean isInGeofence = isInsideGeofence(srcLat, srcLng, srcRadius, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()));
 			          
-			       // Create a LatLng object
-			          LatLng sourceCoordinates = new LatLng(srcLat, srcLng);
+			          if (isInGeofence) {
+							System.out.println("================>Source Inside");
+			                setSourceOutInDB(lDTO);
+			          }
+					  else {
+							System.out.println("================>Source Outside");
+					  }
+			          
 			          
 			          PreparedStatement EndStatement = 
 							  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS EndLat, m.Longitude AS EndLng, d.Radius from VEHICLE v join Depot d on v.EndDepot_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?");
 			          
 			          EndStatement.setString(1,lDTO.getId());
 			          
-			       // Execute the query and retrieve the result
+			          // Execute the query and retrieve the result
 			          ResultSet endResultSet =  EndStatement.executeQuery();
 			          
 			          double endLat = 0;
@@ -481,16 +490,16 @@ public class UtilityImpl {
 			        	  System.out.println("endLat==>"+endLat);
 			        	  System.out.println("endLng==>"+endLng);
 			        	  System.out.println("endRadius"+endRadius);
+			          }  
+			          
+			          boolean isInDestiGeofence = isInsideGeofence(endLat, endLng, endRadius, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()));
+			          if (isInDestiGeofence) {
+							System.out.println("================>Destination Inside");
+							setDestinationInInDB(lDTO);
 			          }
-	
-			          LatLng destinationCoordinates = new LatLng(endLat, endLng);
-			          
-			          
-			          // Simulate vehicle coordinates
-			          LatLng vehicleCoordinates = new LatLng(Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()));
-			          
-			         
-			          
+					  else {
+							System.out.println("================>Destination Outside");
+					  }
 			          
 			          
 					  
@@ -499,12 +508,69 @@ public class UtilityImpl {
 					 } catch (ClassNotFoundException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
-					}
-			  
-			  
+					}		  
 			  
 			  
 		  
 		  }
+		  
+		  static boolean isInsideGeofence(double geofenceCenterLat, double geofenceCenterLng,
+                double geofenceRadius, double vehicleLat, double vehicleLng) {
+				// Calculate the distance between geofence center and vehicle
+				double distance = calculateDistance(geofenceCenterLat, geofenceCenterLng, vehicleLat, vehicleLng);				
+				// Check if the distance is less than or equal to the geofence radius
+				return distance <= geofenceRadius;
+		  }
+
+		  static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+			// Vincenty formula to calculate distance between two points on the Earth's surface
+			double a = 6378137; // equatorial radius in meters
+			double f = 1 / 298.257223563; // flattening
+			double b = (1 - f) * a; // polar radius
+			
+			double phi1 = Math.toRadians(lat1);
+			double phi2 = Math.toRadians(lat2);
+			double lambda1 = Math.toRadians(lon1);
+			double lambda2 = Math.toRadians(lon2);
+			
+			double U1 = Math.atan((1 - f) * Math.tan(phi1));
+			double U2 = Math.atan((1 - f) * Math.tan(phi2));
+			double L = lambda2 - lambda1;
+			double sinU1 = Math.sin(U1);
+			double cosU1 = Math.cos(U1);
+			double sinU2 = Math.sin(U2);
+			double cosU2 = Math.cos(U2);
+			
+			double sinLambda, cosLambda, sinSigma, cosSigma, sigma, sinAlpha, cosSqAlpha, cos2SigmaM;
+			
+			double lambda_prev;
+			do {
+			sinLambda = Math.sin(L);
+			cosLambda = Math.cos(L);
+			sinSigma = Math.sqrt((cosU2 * sinLambda) * (cosU2 * sinLambda) +
+			 (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda) * (cosU1 * sinU2 - sinU1 * cosU2 * cosLambda));
+			if (sinSigma == 0) {
+			return 0; // coincident points
+			}
+			cosSigma = sinU1 * sinU2 + cosU1 * cosU2 * cosLambda;
+			sigma = Math.atan2(sinSigma, cosSigma);
+			sinAlpha = cosU1 * cosU2 * sinLambda / sinSigma;
+			cosSqAlpha = 1 - sinAlpha * sinAlpha;
+			cos2SigmaM = cosSigma - 2 * sinU1 * sinU2 / cosSqAlpha;
+			double C = f / 16 * cosSqAlpha * (4 + f * (4 - 3 * cosSqAlpha));
+			lambda_prev = L;
+			L = (lambda2 - lambda1) + (1 - C) * f * sinAlpha *
+			 (sigma + C * sinSigma * (cos2SigmaM + C * cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM)));
+			} while (Math.abs(L - lambda_prev) > 1e-12);
+			
+			double uSq = cosSqAlpha * (a * a - b * b) / (b * b);
+			double A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+			double B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
+			double deltaSigma = B * sinSigma * (cos2SigmaM + B / 4 * (cosSigma * (-1 + 2 * cos2SigmaM * cos2SigmaM) -
+			B / 6 * cos2SigmaM * (-3 + 4 * sinSigma * sinSigma) * (-3 + 4 * cos2SigmaM * cos2SigmaM)));
+			
+			double distance = b * A * (sigma - deltaSigma);
+			return distance;
+		}	  
 		
 }
