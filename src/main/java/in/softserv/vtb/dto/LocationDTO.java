@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
      
 @Data
-public class LocationDTO {
+public class LocationDTO { 
 
 	private String latitude; 
 	private String longitude; 

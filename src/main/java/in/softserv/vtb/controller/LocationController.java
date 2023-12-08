@@ -107,7 +107,7 @@ public class LocationController {
 		//Thread.sleep(2000);
 		return lDTO;
 	}  
-	
+	 
 	@MessageMapping("/updateVehicleLatLong")
 	public LocationDTO updateVehicleLatLong(LocationDTO lDTO){ 
 		System.out.println("data updating");

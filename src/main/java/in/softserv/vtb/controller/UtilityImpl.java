@@ -11,6 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import com.google.maps.model.LatLng;
 
@@ -172,7 +173,7 @@ public class UtilityImpl {
 		 
 			 try (Connection connection = DBConnection.getConnection();
 					   PreparedStatement statement = 
-					   connection.prepareStatement("INSERT INTO DEPOT(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, EventType, numberofvertices) VALUES(?,?,?,?,?,?,?,?,?,?)")) {
+					   connection.prepareStatement("INSERT INTO Geofence(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, EventType, numberofvertices) VALUES(?,?,?,?,?,?,?,?,?,?)")) {
 					  //statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 				 
 					   PreparedStatement IDStatement = connection.prepareStatement("SELECT NEXT VALUE FOR BAS_IDGEN_SEQ");
@@ -219,7 +220,7 @@ public class UtilityImpl {
 					  
 				      mgeoLocationStatement.executeUpdate();
 				      
-				      PreparedStatement updateDepotLocationRIDStatement = connection.prepareStatement("UPDATE DEPOT SET LOCATION_RID = ? WHERE ID = ?");
+				      PreparedStatement updateDepotLocationRIDStatement = connection.prepareStatement("UPDATE Geofence SET LOCATION_RID = ? WHERE ID = ?");
 					  
 				      updateDepotLocationRIDStatement.setInt(1, locationID);
 				      updateDepotLocationRIDStatement.setInt(2, maxId);				     
@@ -239,7 +240,7 @@ public class UtilityImpl {
 		  
 			 try (Connection connection = DBConnection.getConnection();
 					 	 PreparedStatement statement = 
-					 	 connection.prepareStatement("INSERT INTO DEPOT(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, PolygonVertices, numberOfVertices, EventType) VALUES(?,?,?,?,?,?,?,?,?,?,?)")) {
+					 	 connection.prepareStatement("INSERT INTO Geofence(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, PolygonVertices, numberOfVertices, EventType) VALUES(?,?,?,?,?,?,?,?,?,?,?)")) {
 					  
 						 List<VertexDTO> vertices = lDTO.getPolygonVertices(); 
 				            StringBuilder formattedVertices = new StringBuilder();
@@ -314,7 +315,7 @@ public class UtilityImpl {
 					  
 				      mgeoLocationStatement.executeUpdate();
 				      
-				      PreparedStatement updateDepotLocationRIDStatement = connection.prepareStatement("UPDATE DEPOT SET LOCATION_RID = ? WHERE ID = ?");
+				      PreparedStatement updateDepotLocationRIDStatement = connection.prepareStatement("UPDATE Geofence SET LOCATION_RID = ? WHERE ID = ?"); 
 					  
 				      updateDepotLocationRIDStatement.setInt(1, locationID);
 				      updateDepotLocationRIDStatement.setInt(2, maxId);				     
@@ -419,7 +420,7 @@ public class UtilityImpl {
 							  
 						  }						  
 						  statement.setString(9, entryExit);						  
-						  statement.setString(10, "Depot");
+						  statement.setString(10, "Geofence");
 						  statement.setInt(11, lDTO.getDepotID());
 						  statement.setString(12, "NULL");
 						  
@@ -432,7 +433,7 @@ public class UtilityImpl {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-		    } 
+		  } 
 		  
 		  
 		  
@@ -440,7 +441,7 @@ public class UtilityImpl {
 			  System.out.println("IN BACKEND====>"); 
 			  try (Connection connection = DBConnection.getConnection();
 					  PreparedStatement SourceStatement = 
-					  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS StartLat, m.Longitude AS StartLng, d.Radius from VEHICLE v join Depot d on v.StartDepo_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?")) {
+					  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS StartLat, m.Longitude AS StartLng, d.Radius from VEHICLE v join Geofence d on v.StartDepo_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?")) {
 					  
 				      SourceStatement.setString(1,lDTO.getId());
 				     					 
@@ -462,17 +463,35 @@ public class UtilityImpl {
 			          			     
 			          boolean isInGeofence = isInsideGeofence(srcLat, srcLng, srcRadius, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()));
 			          
-			          if (isInGeofence) {
+			          /*if (isInGeofence) {
 							System.out.println("================>Source Inside");
 			                setSourceOutInDB(lDTO);
 			          }
 					  else {
 							System.out.println("================>Source Outside");
-					  }
+					  }*/
+			       		          
+			       
+			          LocalDateTime inTime = null;
+			          LocalDateTime outTime = null;
+			       // Check if the vehicle is inside the geofence
+			          if (isInGeofence) {
+			              if (inTime == null) {
+			                  inTime = LocalDateTime.now();
+			                  System.out.println("================>Source Inside");
+				              setSourceOutInDB(lDTO);
+			              }
+			          } else {
+			              if (outTime == null && (inTime != null)) {
+			                  outTime = LocalDateTime.now();
+			                  System.out.println("================>Source Outside");
+				              setSourceOutInDB(lDTO);
+			              }
+			          }		          
 			          
 			          
 			          PreparedStatement EndStatement = 
-							  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS EndLat, m.Longitude AS EndLng, d.Radius from VEHICLE v join Depot d on v.EndDepot_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?");
+							  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS EndLat, m.Longitude AS EndLng, d.Radius from VEHICLE v join Geofence d on v.EndDepot_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?");
 			          
 			          EndStatement.setString(1,lDTO.getId());
 			          
@@ -499,8 +518,7 @@ public class UtilityImpl {
 			          }
 					  else {
 							System.out.println("================>Destination Outside");
-					  }
-			          
+					  }          
 			          
 					  
 					 } catch (SQLException ex) {

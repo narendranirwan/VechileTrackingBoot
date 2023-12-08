@@ -1,22 +1,61 @@
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.time.LocalDateTime;
+
+import in.softserv.vtb.db.DBConnection;
+
 public class tet {
 
     public static void main(String[] args) {
+    	
+    	try {
+			Connection connection = DBConnection.getConnection();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
         // Geofence center and radius
         double geofenceCenterLat = 26.867228;
         double geofenceCenterLng = 75.802009;
         double geofenceRadius = 1000; // in meters
 
         // Vehicle location
-        double vehicleLat = 26.867228;
-        double vehicleLng = 75.802009;
+        double vehicleLat = 26.8546521;
+        double vehicleLng = 75.822704;
 
         // Check if the vehicle is inside the geofence
-        boolean isInGeofence = isInsideGeofence(geofenceCenterLat, geofenceCenterLng, geofenceRadius, vehicleLat, vehicleLng);
+        boolean isInGeofence = false; // = isInsideGeofence(geofenceCenterLat, geofenceCenterLng, geofenceRadius, vehicleLat, vehicleLng);
+        
+     // Check if the vehicle is outside the geofence
+      /*  if (isOutsideGeofence(geofenceCenterLat, geofenceCenterLng, geofenceRadius, vehicleLat, vehicleLng)) {
+            System.out.println("Vehicle is outside the geofence!");
+        } else {
+            System.out.println("Vehicle is inside the geofence.");
+        }*/
+        
+        // Timestamps for in and out times
+        LocalDateTime inTime = null;
+        LocalDateTime outTime = null;
+     // Check if the vehicle is inside the geofence
+        if (isInGeofence) {
+            if (inTime == null) {
+                inTime = LocalDateTime.now();
+                System.out.println("Vehicle entered the geofence at: " + inTime);
+            }
+        } else {
+            if (outTime == null && inTime != null) {
+                outTime = LocalDateTime.now();
+                System.out.println("Vehicle exited the geofence at: " + outTime);
+            }
+        }
 
-        if (isInGeofence)
+       /* if (isInGeofence)
 			System.out.println("================>Source Inside");
 		else
-			System.out.println("================>Source Outside");
+			System.out.println("================>Source Outside");*/
         // Print the result
         //System.out.println("Is the vehicle inside the geofence? " + isInGeofence);
     }
@@ -28,6 +67,15 @@ public class tet {
 
         // Check if the distance is less than or equal to the geofence radius
         return distance <= geofenceRadius;
+    }
+    
+    static boolean isOutsideGeofence(double geofenceCenterLat, double geofenceCenterLng,
+            double geofenceRadius, double vehicleLat, double vehicleLng) {
+			// Calculate the distance between geofence center and vehicle
+			double distance = calculateDistance(geofenceCenterLat, geofenceCenterLng, vehicleLat, vehicleLng);
+			
+			// Check if the distance is greater than the geofence radius
+			return distance > geofenceRadius;
     }
 
     static double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
@@ -80,4 +128,6 @@ public class tet {
         double distance = b * A * (sigma - deltaSigma);
         return distance;
     }
+    
+    
 }
