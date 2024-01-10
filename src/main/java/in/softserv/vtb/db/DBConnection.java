@@ -65,43 +65,45 @@ public class DBConnection {
 	
     public static Connection getConnection() throws ClassNotFoundException, SQLException { 
     	
-    	Connection con=null;
-    	String dbName="";
+    	Connection con=null;    	
+    	
+    	// GeoFenceDbName Initialization with Database Name
     	String GeoFenceDbName = "GeoFenceDbName";
     	
 		DBConnection dbc=new DBConnection(); 
 		HashMap temp=dbc.getValues();
+		
 		Class.forName((String) temp.get("driver"));
+		
 		String url=(String)temp.get("url")+GeoFenceDbName;
 		String uid=(String)temp.get("uid");
 		String pass=(String)temp.get("password");
+		
 		System.out.println(url+"-"+uid+"-"+pass);
+		
 		con=DriverManager.getConnection(url,uid,pass);
 		
-		PreparedStatement DBNameStatement = con.prepareStatement("SELECT DBNAME FROM DatabaseDetail");
-	       // Execute the query and retrieve the result
-	    ResultSet DBNameResultSet =  DBNameStatement.executeQuery();
-	    
-	    if(DBNameResultSet.next()){	
-	    	
-	    	dbName = DBNameResultSet.getString(1);	  	
-	    	
-	    }
-	    
+		
+		/*String dbName="";
+		PreparedStatement DBNameStatement = con.prepareStatement("SELECT DBNAME FROM DatabaseDetail");	    
+	    ResultSet DBNameResultSet =  DBNameStatement.executeQuery();	    
+	    if(DBNameResultSet.next()){		    	
+	    	dbName = DBNameResultSet.getString(1);	    	
+	    }	    
 	    System.out.println("dbName:==>"+dbName);
 	    Class.forName((String) temp.get("driver"));
 		url=(String)temp.get("url")+dbName;
 		uid=(String)temp.get("uid");
 		pass=(String)temp.get("password");
 		System.out.println(url+"-"+uid+"-"+pass);
-		con=DriverManager.getConnection(url,uid,pass);
+		con=DriverManager.getConnection(url,uid,pass);*/
 	    
 		return con;
 		
     	//Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-       // Connection con = DriverManager.getConnection("jdbc:sqlserver://localhost;databaseName=VT", "sa", "Password!@#");
+        // Connection con = DriverManager.getConnection("jdbc:sqlserver://localhost;databaseName=VT", "sa", "Password!@#");
     	//Connection con = DriverManager.getConnection("jdbc:sqlserver://go-dev-server.cywja9nnzazr.ap-southeast-2.rds.amazonaws.com;databaseName=VT", "admin", "f08XQOraEyNN");
-      //  return con;
+        //  return con;
     }
       
        

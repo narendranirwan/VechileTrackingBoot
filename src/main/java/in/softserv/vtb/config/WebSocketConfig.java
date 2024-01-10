@@ -22,7 +22,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
 	@Override
 	public void registerStompEndpoints(StompEndpointRegistry registry) {
 		registry.addEndpoint("/updateMapLocation");
-		registry.addEndpoint("/updateMapLocation").withSockJS();
+		//registry.addEndpoint("/updateMapLocation").withSockJS();
+		//registry.addEndpoint("/updateMapLocation").setAllowedOrigins("*").withSockJS();
+		registry.addEndpoint("/updateMapLocation").setAllowedOriginPatterns("*").withSockJS();
 		
 		//registry.addEndpoint("/updateMapLocation").setHandshakeHandler(new UserHandshakeHandler()).withSockJS();
 		

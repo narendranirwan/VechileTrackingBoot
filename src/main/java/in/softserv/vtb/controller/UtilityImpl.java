@@ -45,7 +45,7 @@ public class UtilityImpl {
 	
 		 try (Connection connection = DBConnection.getConnection();
 				   PreparedStatement statement = 
-				   connection.prepareStatement("UPDATE VEHICLE SET SourceOut = ? WHERE ID = ?")) {
+				  connection.prepareStatement("UPDATE VEHICLE SET SourceOut = ? WHERE ID = ?")) {
 				  statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 				  statement.setString(2, lDTO.getId());
 				  statement.executeUpdate();
@@ -74,7 +74,7 @@ public class UtilityImpl {
 				}
 	 } 
 	
-	  public void setPolygonVerticsInDB(LocationDTO lDTO) {
+	 public void setPolygonVerticsInDB(LocationDTO lDTO) {
 		// TODO Auto-generated method stub
 	
 		 try (Connection connection = DBConnection.getConnection();	
@@ -131,6 +131,51 @@ public class UtilityImpl {
 					e.printStackTrace();
 				}
 	   }
+	 
+	   public void updateZonePolygonVerticsInDB(LocationDTO lDTO) {
+			// TODO Auto-generated method stub
+		
+			 try (Connection connection = DBConnection.getConnection();						 
+					 
+					  PreparedStatement statement = 
+					  connection.prepareStatement("UPDATE ZONE SET PolygonVertices=?, numberOfVertices=?  WHERE ID = ?")) {
+					// Sample list of vertices
+			            List<VertexDTO> vertices = lDTO.getPolygonVertices(); 
+			            StringBuilder formattedVertices = new StringBuilder();
+			            for (VertexDTO vertex : vertices) {
+			                double lat = vertex.getLat();
+			                double lng = vertex.getLng();
+
+			                System.out.println("Lat: " + lat + ", Lng: " + lng);
+			             // Append the formatted vertex to the StringBuilder
+			                formattedVertices.append("(")
+			                                .append(lat)
+			                                .append(", ")
+			                                .append(lng)
+			                                .append("),");
+			            } 
+			         // Remove the trailing comma, if any
+			            if (formattedVertices.length() > 0) {
+			                formattedVertices.deleteCharAt(formattedVertices.length() - 1);
+			            }
+			                                       
+			           
+			            
+			            String formattedString = formattedVertices.toString();
+			            System.out.println(formattedString);
+				           
+					  
+			            statement.setString(1, formattedString);
+			            statement.setString(2, lDTO.getNumberOfVertices());
+			            statement.setInt(3, lDTO.getZoneID()); 
+			            statement.executeUpdate();
+					 } catch (SQLException ex) {
+					  ex.printStackTrace();
+					 } catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	  }
 	  
 	  public void setEntryInZoneInDB(LocationDTO lDTO) {
 			// TODO Auto-generated method stub
@@ -170,7 +215,7 @@ public class UtilityImpl {
 	  
 	  public void setDepotIntoDB(LocationDTO lDTO) {
 			// TODO Auto-generated method stub
-		 
+		    
 			 try (Connection connection = DBConnection.getConnection();
 					   PreparedStatement statement = 
 					   connection.prepareStatement("INSERT INTO Geofence(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, EventType, numberofvertices) VALUES(?,?,?,?,?,?,?,?,?,?)")) {
@@ -179,7 +224,7 @@ public class UtilityImpl {
 					   PreparedStatement IDStatement = connection.prepareStatement("SELECT NEXT VALUE FOR BAS_IDGEN_SEQ");
 				       // Execute the query and retrieve the result
 				       ResultSet resultSet =  IDStatement.executeQuery();
-		
+				       
 				       // Get the maximum ID
 				       int maxId = 0;
 				       if (resultSet.next()) {
@@ -226,6 +271,50 @@ public class UtilityImpl {
 				      updateDepotLocationRIDStatement.setInt(2, maxId);				     
 					  
 				      updateDepotLocationRIDStatement.executeUpdate();
+					  
+					 } catch (SQLException ex) {
+					  ex.printStackTrace();
+					 } catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	 }
+	  
+	 public void updateDepotIntoDB(LocationDTO lDTO) {
+			// TODO Auto-generated method stub
+		 
+			 try (Connection connection = DBConnection.getConnection();
+					   PreparedStatement statement = 
+					   connection.prepareStatement("Update GEOFENCE set numberOfVertices=?,polygonVertices=?,EventType=?,Radius=? where id = ?")) {
+					  				   				       
+				      statement.setInt(1, 0);
+					  statement.setString(2, "NULL");
+					  statement.setString(3, "Circle");
+					  statement.setString(4, lDTO.getDepotRadius());
+					  statement.setInt(5, lDTO.getDepotID());					  
+					  					  
+					  statement.executeUpdate();
+					  
+					  System.out.println("lDTO.getDepotID()):::===>"+lDTO.getDepotID());
+                      
+			          PreparedStatement psIDStatement = connection.prepareStatement("select Location_RID from GEOFENCE where id=?");
+			          psIDStatement.setInt(1, lDTO.getDepotID());
+			            // Execute the query and retrieve the result
+			          ResultSet resultSetRs =  psIDStatement.executeQuery();
+	
+			          // Get the maximum ID
+			          int Location_RID = 0;
+			          if (resultSetRs.next()) {
+			           	Location_RID = resultSetRs.getInt(1);
+			          }
+			          System.out.println("lDTO.Location_RID==CIRCLE UPDATE=>"+Location_RID);
+				      
+			          PreparedStatement mgeoLocationStatement = connection.prepareStatement("Update MGEOLOCATION set Latitude=?,Longitude=? where id = ?");		  
+				      mgeoLocationStatement.setString(1, lDTO.getDepotLat());
+				      mgeoLocationStatement.setString(2, lDTO.getDepotLng());
+				      mgeoLocationStatement.setInt(3, Location_RID);					  
+				  
+				      mgeoLocationStatement.executeUpdate();     
 					  
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
@@ -285,7 +374,7 @@ public class UtilityImpl {
 					  statement.setString(5, "MGeoLocation");
 					  statement.setString(6, "1");
 					  statement.setString(7, "NULL");
-					  statement.setString(8, lDTO.getDepotRadius());
+					  statement.setString(8, "0");
 					  statement.setString(9, formattedString);
 					  statement.setString(10, lDTO.getNumberOfVertices());
 					  statement.setString(11, "Polygon");
@@ -329,6 +418,77 @@ public class UtilityImpl {
 						e.printStackTrace();
 					}
 	 }
+	  
+	 public void updateDepotIntoDBAsPloygon(LocationDTO lDTO) {
+			// TODO Auto-generated method stub
+		  
+			 try (Connection connection = DBConnection.getConnection();
+					 	 PreparedStatement statement = 
+					 	 connection.prepareStatement("Update GEOFENCE set numberOfVertices=?,polygonVertices=?,EventType=?,Radius=? where id = ?")) {
+					  
+						 List<VertexDTO> vertices = lDTO.getPolygonVertices(); 
+				            StringBuilder formattedVertices = new StringBuilder();
+				            for (VertexDTO vertex : vertices) {
+				                double lat = vertex.getLat();
+				                double lng = vertex.getLng();
+		
+				                System.out.println("Lat: " + lat + ", Lng: " + lng);
+				             // Append the formatted vertex to the StringBuilder
+				                formattedVertices.append("(")
+				                                .append(lat)
+				                                .append(", ")
+				                                .append(lng)
+				                                .append("),");
+				            } 
+				         // Remove the trailing comma, if any
+				            if (formattedVertices.length() > 0) {
+				                formattedVertices.deleteCharAt(formattedVertices.length() - 1);
+				            }
+				            
+				            System.out.println("lDTO.getDepotID()):::===>"+lDTO.getDepotID());
+				                              
+				            PreparedStatement IDStatement = connection.prepareStatement("select Location_RID from GEOFENCE where id=?");
+				            IDStatement.setInt(1, lDTO.getDepotID());
+				            // Execute the query and retrieve the result
+				            ResultSet resultSet =  IDStatement.executeQuery();
+		
+				            // Get the maximum ID
+				            int Location_RID = 0;
+				            if (resultSet.next()) {
+				            	Location_RID = resultSet.getInt(1);
+				            }
+				            System.out.println("lDTO.Location_RID==POLYGON UPDATE=>"+Location_RID);
+				            // Calculate the next ID (increment by 1)
+				            //int nextId = maxId + 1;
+				            
+				            String formattedString = formattedVertices.toString();
+				            System.out.println(formattedString);				 
+					
+						    statement.setString(1, lDTO.getNumberOfVertices());
+							//statement.setTimestamp(2, new Timestamp(System.currentTimeMillis()));
+						    statement.setString(2, formattedString);
+						    statement.setString(3, "Polygon");
+							statement.setString(4, "NULL");	
+							statement.setInt(5, lDTO.getDepotID());	
+					  
+					        statement.executeUpdate();
+					  
+					  	      
+					        PreparedStatement mgeoLocationStatement = connection.prepareStatement("Update MGEOLOCATION set Latitude=?,Longitude=? where id = ?");		  
+					        mgeoLocationStatement.setString(1, lDTO.getDepotLat());
+					        mgeoLocationStatement.setString(2, lDTO.getDepotLng());
+					        mgeoLocationStatement.setInt(3, Location_RID);					  
+					  
+					        mgeoLocationStatement.executeUpdate();     
+				      
+					  
+					 } catch (SQLException ex) {
+					  ex.printStackTrace();
+					 } catch (ClassNotFoundException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+	 } 
 	  
 	  	  
 	  
@@ -441,7 +601,7 @@ public class UtilityImpl {
 			  System.out.println("IN BACKEND====>"); 
 			  try (Connection connection = DBConnection.getConnection();
 					  PreparedStatement SourceStatement = 
-					  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS StartLat, m.Longitude AS StartLng, d.Radius from VEHICLE v join Geofence d on v.StartDepo_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?")) {
+					  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS StartLat, m.Longitude AS StartLng, d.Radius, d.EventType, d.numberOfVertices, d.polygonVertices from VEHICLE v join Geofence d on v.StartDepo_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?")) {
 					  
 				      SourceStatement.setString(1,lDTO.getId());
 				     					 
@@ -451,47 +611,85 @@ public class UtilityImpl {
 			          double srcLat = 0;
 			          double srcLng = 0;
 			          double srcRadius = 0;
+			          String srcEventType ="";
+			          int srcNumberOfVertices = 0;
+			          String srcPolygonVertices = "";
 			          
 			          if(sourceResultSet.next()) {
 			        	  srcLat = sourceResultSet.getDouble(4);
 			        	  srcLng = sourceResultSet.getDouble(5);
 			        	  srcRadius = sourceResultSet.getDouble(6);
+			        	  srcEventType = sourceResultSet.getString(7);
 			        	  System.out.println("srcLat==>"+srcLat);
 			        	  System.out.println("srcLng==>"+srcLng);
-			        	  System.out.println("srcRadius"+srcRadius);
+			        	  System.out.println("srcRadius==>"+srcRadius);
+			        	  System.out.println("srcEventType==>"+srcEventType);
+			        	  
+			        	  if(srcEventType.equals("Polygon")) {
+			        		  srcNumberOfVertices = sourceResultSet.getInt(8);
+			        		  srcPolygonVertices = sourceResultSet.getString(9);
+				        	  System.out.println("srcNumberOfVertices=>"+srcNumberOfVertices);
+				        	  System.out.println("srcPolygonVertices=>"+srcPolygonVertices);
+			        	  } 			        	  
+			        	 
 			          }
-			          			     
-			          boolean isInGeofence = isInsideGeofence(srcLat, srcLng, srcRadius, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()));
-			          
-			          /*if (isInGeofence) {
-							System.out.println("================>Source Inside");
-			                setSourceOutInDB(lDTO);
+			          			
+			          if(srcEventType.equals("Circle")) {
+				          boolean isInGeofence = isInsideGeofence(srcLat, srcLng, srcRadius, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()));
+				          
+				          /*if (isInGeofence) {
+								System.out.println("================>Source Inside");
+				                setSourceOutInDB(lDTO);
+				          }
+						  else {
+								System.out.println("================>Source Outside");
+						  }*/
+				       		          
+				       
+				          LocalDateTime inTime = null;				         
+				          //Check if the vehicle is inside the geofence
+				          if (isInGeofence) {
+				              if (inTime == null) {
+				                  inTime = LocalDateTime.now();
+				                  System.out.println("====>Source Inside Circle");
+					              setSourceOutInDB(lDTO);
+				              }
+				          } 	          
 			          }
-					  else {
-							System.out.println("================>Source Outside");
-					  }*/
-			       		          
-			       
-			          LocalDateTime inTime = null;
-			          LocalDateTime outTime = null;
-			       // Check if the vehicle is inside the geofence
-			          if (isInGeofence) {
-			              if (inTime == null) {
-			                  inTime = LocalDateTime.now();
-			                  System.out.println("================>Source Inside");
-				              setSourceOutInDB(lDTO);
-			              }
-			          } else {
-			              if (outTime == null && (inTime != null)) {
-			                  outTime = LocalDateTime.now();
-			                  System.out.println("================>Source Outside");
-				              setSourceOutInDB(lDTO);
-			              }
-			          }		          
 			          
+			          if(srcEventType.equals("Polygon")) {
+			        	  
+			        	  // Remove parentheses and split into individual coordinates
+			              String[] coordinatePairs = srcPolygonVertices.replaceAll("[()]", "").split(",");
+
+			              // Convert to separate x and y arrays
+			              double[] xPoints = new double[coordinatePairs.length / 2];
+			              double[] yPoints = new double[coordinatePairs.length / 2];
+
+			              for (int i = 0; i < coordinatePairs.length; i += 2) {
+			              	xPoints[i / 2] = Double.parseDouble(coordinatePairs[i].trim());
+			              	yPoints[i / 2] = Double.parseDouble(coordinatePairs[i + 1].trim());
+			              }
+			              
+			              // Check if the vehicle is inside or outside the geofence
+			              boolean isInside = isInsidePolygonGeofence(xPoints, yPoints, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()), srcNumberOfVertices);
+
+			              if (isInside) {
+			            	  LocalDateTime inTime = null;
+			            	  //System.out.println("Vehicle is " + (isInside ? "inside" : "outside") + " the geofence."); 
+			            	  if (inTime == null) {
+				                  inTime = LocalDateTime.now();
+				                  System.out.println("====>Source Inside PolyGon");
+					              setSourceOutInDB(lDTO);
+				              }
+			            	  
+			              }			        	  
 			          
+			          }
+			          
+			          			          
 			          PreparedStatement EndStatement = 
-							  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS EndLat, m.Longitude AS EndLng, d.Radius from VEHICLE v join Geofence d on v.EndDepot_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?");
+							  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS EndLat, m.Longitude AS EndLng, d.Radius, d.EventType, d.numberOfVertices, d.polygonVertices from VEHICLE v join Geofence d on v.EndDepot_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?");
 			          
 			          EndStatement.setString(1,lDTO.getId());
 			          
@@ -501,32 +699,84 @@ public class UtilityImpl {
 			          double endLat = 0;
 			          double endLng = 0;
 			          double endRadius = 0;
+			          String endEventType = "";
+			          int endNumberOfVertices = 0;
+			          String endcPolygonVertices = "";
 			          
 			          if(endResultSet.next()) {
 			        	  endLat = endResultSet.getDouble(4);
 			        	  endLng = endResultSet.getDouble(5);
 			        	  endRadius = endResultSet.getDouble(6);
+			        	  endEventType = endResultSet.getString(7);
 			        	  System.out.println("endLat==>"+endLat);
 			        	  System.out.println("endLng==>"+endLng);
-			        	  System.out.println("endRadius"+endRadius);
-			          }  
+			        	  System.out.println("endRadius==>"+endRadius);
+			        	  System.out.println("endEventType==>"+endEventType);
+			        	  
+			        	  if(endEventType.equals("Polygon")) {
+			        		  endNumberOfVertices = endResultSet.getInt(8);
+			        		  endcPolygonVertices = endResultSet.getString(9);
+				        	  System.out.println("endNumberOfVertices=>"+endNumberOfVertices);
+				        	  System.out.println("endcPolygonVertices=>"+endcPolygonVertices);
+			        	  } 			        	
+			          }  			          
+			    	          
+			          if(endEventType.equals("Circle")) {
+				          boolean isInDestiGeofence = isInsideGeofence(endLat, endLng, endRadius, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()));
+				          LocalDateTime inTime = null;	
+				          if (isInDestiGeofence) {
+				        	  if (inTime == null) {
+				        		  inTime = LocalDateTime.now();
+				        		  System.out.println("====>Destination Inside Circle");
+								  setDestinationInInDB(lDTO);
+				        	  }								
+				          }						  
+			           }
 			          
-			          boolean isInDestiGeofence = isInsideGeofence(endLat, endLng, endRadius, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()));
-			          if (isInDestiGeofence) {
-							System.out.println("================>Destination Inside");
-							setDestinationInInDB(lDTO);
+			          
+			          if(endEventType.equals("Polygon")) {
+			        	  
+			        	// Remove parentheses and split into individual coordinates
+			              String[] coordinatePairs = endcPolygonVertices.replaceAll("[()]", "").split(",");
+
+			              // Convert to separate x and y arrays
+			              double[] xPoints = new double[coordinatePairs.length / 2];
+			              double[] yPoints = new double[coordinatePairs.length / 2];
+
+			              for (int i = 0; i < coordinatePairs.length; i += 2) {
+			              	xPoints[i / 2] = Double.parseDouble(coordinatePairs[i].trim());
+			              	yPoints[i / 2] = Double.parseDouble(coordinatePairs[i + 1].trim());
+			              }
+			              
+			              // Check if the vehicle is inside or outside the geofence
+			              boolean isInside = isInsidePolygonGeofence(xPoints, yPoints, Double.parseDouble(lDTO.getLatitude()), Double.parseDouble(lDTO.getLongitude()), endNumberOfVertices);
+
+			              if (isInside) {
+			            	  LocalDateTime inTime = null;
+			            	  if (inTime == null) {
+				                  inTime = LocalDateTime.now();
+				                  System.out.println("====>Destination Inside PolyGon");
+				                  setDestinationInInDB(lDTO);
+				              }
+			            	  
+			              }
+			          
+			        	  
+			        	  
 			          }
-					  else {
-							System.out.println("================>Destination Outside");
-					  }          
 			          
-					  
-					 } catch (SQLException ex) {
-					  ex.printStackTrace();
-					 } catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}		  
+			          
+			          
+			          
+			          
+				          
+			  		}catch (SQLException ex) {
+						  ex.printStackTrace();
+					} catch (ClassNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+					}	
+			  		
 			  
 			  
 		  
@@ -590,5 +840,24 @@ public class UtilityImpl {
 			double distance = b * A * (sigma - deltaSigma);
 			return distance;
 		}	  
+		  
+		private static boolean isInsidePolygonGeofence(double[] xPoints, double[] yPoints, double vehicleLat, double vehicleLng, int numberOfVertices) {
+		        int j = numberOfVertices - 1;
+		        boolean isInside = false;
+
+		        for (int i = 0; i < numberOfVertices; i++) {
+		            if ((yPoints[i] < vehicleLng && yPoints[j] >= vehicleLng
+		                    || yPoints[j] < vehicleLng && yPoints[i] >= vehicleLng)
+		                    && (xPoints[i] <= vehicleLat || xPoints[j] <= vehicleLat)) {
+		                if (xPoints[i] + (vehicleLng - yPoints[i]) / (yPoints[j] - yPoints[i]) * (xPoints[j] - xPoints[i]) < vehicleLat) {
+		                    isInside = !isInside;
+		                }
+		            }
+		            j = i;
+		        }
+
+		        return isInside;
+		}  
+		  
 		
 }

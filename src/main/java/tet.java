@@ -1,6 +1,10 @@
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import in.softserv.vtb.db.DBConnection;
 
@@ -8,15 +12,9 @@ public class tet {
 
     public static void main(String[] args) {
     	
-    	try {
-			Connection connection = DBConnection.getConnection();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+    	
+
+        
         // Geofence center and radius
         double geofenceCenterLat = 26.867228;
         double geofenceCenterLng = 75.802009;
@@ -60,6 +58,11 @@ public class tet {
         //System.out.println("Is the vehicle inside the geofence? " + isInGeofence);
     }
 
+    
+    
+    
+    
+    
     static boolean isInsideGeofence(double geofenceCenterLat, double geofenceCenterLng,
                                      double geofenceRadius, double vehicleLat, double vehicleLng) {
         // Calculate the distance between geofence center and vehicle
@@ -128,6 +131,8 @@ public class tet {
         double distance = b * A * (sigma - deltaSigma);
         return distance;
     }
+    
+    
     
     
 }
