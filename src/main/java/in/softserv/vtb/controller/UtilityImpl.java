@@ -23,65 +23,70 @@ public class UtilityImpl {
 
 	public void setLocationInDB(LocationDTO lDTO) {
 		// TODO Auto-generated method stub
-	
-		 try (Connection connection = DBConnection.getConnection();
-				   PreparedStatement statement = 
-				     connection.prepareStatement("UPDATE MAPINFO SET longitude = ?, latitude = ?, status = ? WHERE truckId = ?")) {
+		
+		
+		
+		try {
+				DBConnection db = DBConnection.getInstance();
+				Connection connection = db.getConnection();
+				PreparedStatement statement = 
+				     connection.prepareStatement("UPDATE MAPINFO SET longitude = ?, latitude = ?, status = ? WHERE truckId = ?");
 				  statement.setString(1, lDTO.getLongitude());
 				  statement.setString(2, lDTO.getLatitude());
 				  statement.setString(3, lDTO.getStatus());
 				  statement.setString(4, lDTO.getId());
 				  statement.executeUpdate();
-				 } catch (SQLException ex) {
-				  ex.printStackTrace();
-				 } catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		} catch (SQLException ex) {
+			  ex.printStackTrace();
+		} 
 	}
 	
 	public void setSourceOutInDB(LocationDTO lDTO) {
 		// TODO Auto-generated method stub
-	
-		 try (Connection connection = DBConnection.getConnection();
+		
+		
+		 		 
+		 try {
+			 	DBConnection db = DBConnection.getInstance();
+		        System.out.println("db:"+db);
+			     Connection connection = db.getConnection();
+			     System.out.println("connection:"+connection);
+			     
 				   PreparedStatement statement = 
-				  connection.prepareStatement("UPDATE VEHICLE SET SourceOut = ? WHERE ID = ?")) {
+				  connection.prepareStatement("UPDATE VEHICLE SET SourceOut = ? WHERE ID = ?");
 				  statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 				  statement.setString(2, lDTO.getId());
 				  statement.executeUpdate();
-				 } catch (SQLException ex) {
+				 }catch (SQLException ex) {
 				  ex.printStackTrace();
-				 } catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				 }
 	 } 
 	 
 	public void setDestinationInInDB(LocationDTO lDTO) {
 		// TODO Auto-generated method stub
-	
-		 try (Connection connection = DBConnection.getConnection();
+						
+		try {
+				  DBConnection db = DBConnection.getInstance();
+				  Connection connection = db.getConnection();
 				  PreparedStatement statement = 
-				  connection.prepareStatement("UPDATE VEHICLE SET DestinationIn = ? WHERE ID = ?")) {
+				  connection.prepareStatement("UPDATE VEHICLE SET DestinationIn = ? WHERE ID = ?");
 				  statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 				  statement.setString(2, lDTO.getId());
 				  statement.executeUpdate();
 				 } catch (SQLException ex) {
 				  ex.printStackTrace();
-				 } catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				 }
 	 } 
 	
 	 public void setPolygonVerticsInDB(LocationDTO lDTO) {
 		// TODO Auto-generated method stub
-	
-		 try (Connection connection = DBConnection.getConnection();	
+			
+		 try {
 				 
-				 
+			 	DBConnection db = DBConnection.getInstance();
+				Connection connection = db.getConnection();
 				  PreparedStatement statement = 
-				  connection.prepareStatement("INSERT INTO ZONE (ID,PolygonVertices,numberOfVertices,name) VALUES (?,?,?,?)")) {
+				  connection.prepareStatement("INSERT INTO ZONE (ID,PolygonVertices,numberOfVertices,name) VALUES (?,?,?,?)");
 				// Sample list of vertices
 		            List<VertexDTO> vertices = lDTO.getPolygonVertices(); 
 		            StringBuilder formattedVertices = new StringBuilder();
@@ -126,19 +131,17 @@ public class UtilityImpl {
 				  statement.executeUpdate();
 				 } catch (SQLException ex) {
 				  ex.printStackTrace();
-				 } catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				 }
 	   }
 	 
 	   public void updateZonePolygonVerticsInDB(LocationDTO lDTO) {
 			// TODO Auto-generated method stub
-		
-			 try (Connection connection = DBConnection.getConnection();						 
-					 
+				  
+			 try {		 
+				 	  DBConnection db = DBConnection.getInstance();
+				 	  Connection connection = db.getConnection();
 					  PreparedStatement statement = 
-					  connection.prepareStatement("UPDATE ZONE SET PolygonVertices=?, numberOfVertices=?  WHERE ID = ?")) {
+					  connection.prepareStatement("UPDATE ZONE SET PolygonVertices=?, numberOfVertices=?  WHERE ID = ?");
 					// Sample list of vertices
 			            List<VertexDTO> vertices = lDTO.getPolygonVertices(); 
 			            StringBuilder formattedVertices = new StringBuilder();
@@ -171,18 +174,16 @@ public class UtilityImpl {
 			            statement.executeUpdate();
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
-					 } catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					 } 
 	  }
 	  
 	  public void setEntryInZoneInDB(LocationDTO lDTO) {
-			// TODO Auto-generated method stub
-		 
-			 try (Connection connection = DBConnection.getConnection();
+					 
+			try {
+					   DBConnection db = DBConnection.getInstance();
+					   Connection connection = db.getConnection();
 					   PreparedStatement statement = 
-					   connection.prepareStatement("INSERT INTO ZONEENTRY(ID,BASVERSION,BASTIMESTAMP,Vehicle_REN,Vehicle_RID,Vehicle_RMA,Time,Zone_REN,Zone_RID,Zone_RMA) VALUES(?,?,?,?,?,?,?,?,?,?)")) {
+					   connection.prepareStatement("INSERT INTO ZONEENTRY(ID,BASVERSION,BASTIMESTAMP,Vehicle_REN,Vehicle_RID,Vehicle_RMA,Time,Zone_REN,Zone_RID,Zone_RMA) VALUES(?,?,?,?,?,?,?,?,?,?)");
 					  //statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 				 
 					   PreparedStatement IDStatement = connection.prepareStatement("SELECT NEXT VALUE FOR BAS_IDGEN_SEQ");
@@ -207,18 +208,20 @@ public class UtilityImpl {
 					  statement.executeUpdate();
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
-					 } catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-	 }
+					 } 
+	  }
 	  
 	  public void setDepotIntoDB(LocationDTO lDTO) {
 			// TODO Auto-generated method stub
-		    
-			 try (Connection connection = DBConnection.getConnection();
+		  
+		     
+			 try {
+				 	   DBConnection db = DBConnection.getInstance();
+				       System.out.println("db:"+db);
+					   Connection connection = db.getConnection();
+					   System.out.println("connection:"+connection);
 					   PreparedStatement statement = 
-					   connection.prepareStatement("INSERT INTO Geofence(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, EventType, numberofvertices) VALUES(?,?,?,?,?,?,?,?,?,?)")) {
+					   connection.prepareStatement("INSERT INTO Geofence(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, EventType, numberofvertices) VALUES(?,?,?,?,?,?,?,?,?,?)");
 					  //statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 				 
 					   PreparedStatement IDStatement = connection.prepareStatement("SELECT NEXT VALUE FOR BAS_IDGEN_SEQ");
@@ -274,18 +277,17 @@ public class UtilityImpl {
 					  
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
-					 } catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					 } 
 	 }
 	  
 	 public void updateDepotIntoDB(LocationDTO lDTO) {
 			// TODO Auto-generated method stub
-		 
-			 try (Connection connection = DBConnection.getConnection();
+		 	
+			 try {
+				 	  DBConnection db = DBConnection.getInstance();
+					  Connection connection = db.getConnection();
 					   PreparedStatement statement = 
-					   connection.prepareStatement("Update GEOFENCE set numberOfVertices=?,polygonVertices=?,EventType=?,Radius=? where id = ?")) {
+					   connection.prepareStatement("Update GEOFENCE set numberOfVertices=?,polygonVertices=?,EventType=?,Radius=? where id = ?");
 					  				   				       
 				      statement.setInt(1, 0);
 					  statement.setString(2, "NULL");
@@ -318,18 +320,17 @@ public class UtilityImpl {
 					  
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
-					 } catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					 } 
 	 }
 	  
 	  public void setDepotIntoDBAsPloygon(LocationDTO lDTO) {
 			// TODO Auto-generated method stub
-		  
-			 try (Connection connection = DBConnection.getConnection();
+		  		  
+			 try {
+				 		DBConnection db = DBConnection.getInstance();
+				 		Connection connection = db.getConnection();
 					 	 PreparedStatement statement = 
-					 	 connection.prepareStatement("INSERT INTO Geofence(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, PolygonVertices, numberOfVertices, EventType) VALUES(?,?,?,?,?,?,?,?,?,?,?)")) {
+					 	 connection.prepareStatement("INSERT INTO Geofence(ID, BASVERSION, BASTIMESTAMP, Name, Location_REN, Location_RID, Location_RMA, Radius, PolygonVertices, numberOfVertices, EventType) VALUES(?,?,?,?,?,?,?,?,?,?,?)");
 					  
 						 List<VertexDTO> vertices = lDTO.getPolygonVertices(); 
 				            StringBuilder formattedVertices = new StringBuilder();
@@ -413,18 +414,17 @@ public class UtilityImpl {
 					  
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
-					 } catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					 } 
 	 }
 	  
 	 public void updateDepotIntoDBAsPloygon(LocationDTO lDTO) {
 			// TODO Auto-generated method stub
-		  
-			 try (Connection connection = DBConnection.getConnection();
+		
+			 try {
+				 		DBConnection db = DBConnection.getInstance();
+				 		Connection connection = db.getConnection();
 					 	 PreparedStatement statement = 
-					 	 connection.prepareStatement("Update GEOFENCE set numberOfVertices=?,polygonVertices=?,EventType=?,Radius=? where id = ?")) {
+					 	 connection.prepareStatement("Update GEOFENCE set numberOfVertices=?,polygonVertices=?,EventType=?,Radius=? where id = ?");
 					  
 						 List<VertexDTO> vertices = lDTO.getPolygonVertices(); 
 				            StringBuilder formattedVertices = new StringBuilder();
@@ -484,10 +484,7 @@ public class UtilityImpl {
 					  
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
-					 } catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					 } 
 	 } 
 	  
 	  	  
@@ -497,10 +494,16 @@ public class UtilityImpl {
 	  
 	  public void updateVehicleLatLongInDB(LocationDTO lDTO) {
 			// TODO Auto-generated method stub
-		
-			 try (Connection connection = DBConnection.getConnection();
+		  
+			 try {
+				 
+					  DBConnection db = DBConnection.getInstance();
+				      System.out.println("db:"+db);
+					  Connection connection = db.getConnection();
+					  System.out.println("connection:"+connection);
+			 
 					  PreparedStatement statement = 
-					  connection.prepareStatement("UPDATE MGEOLOCATION SET LATITUDE=?, LONGITUDE=? where id = ?")) {
+					  connection.prepareStatement("UPDATE MGEOLOCATION SET LATITUDE=?, LONGITUDE=? where id = ?");
 					  
 				      System.out.println("INNN====>"); 
 					  PreparedStatement CurrentLocStatement = connection.prepareStatement("SELECT CurrentLocation_RID FROM VEHICLE WHERE ID = ?");
@@ -526,18 +529,17 @@ public class UtilityImpl {
 					  
 					 } catch (SQLException ex) {
 					  ex.printStackTrace();
-					 } catch (ClassNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					 } 
 	      }  
 	  	 
 		  public void setEntryInDepotInDB(LocationDTO lDTO) {
 				// TODO Auto-generated method stub
-			  
-				 try (Connection connection = DBConnection.getConnection();
+			   
+				 try {
+					 		DBConnection db = DBConnection.getInstance();
+					 		Connection connection = db.getConnection();
 						   PreparedStatement statement = 
-						   connection.prepareStatement("INSERT INTO DEPOENTRY(ID, BASVERSION, BASTIMESTAMP, EntryExitTime, Vehicle_REN, Vehicle_RID, Vehicle_RMA, isEntry, EntryExit, Depo_REN, Depo_RID, Depo_RMA) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)")) {
+						   connection.prepareStatement("INSERT INTO DEPOENTRY(ID, BASVERSION, BASTIMESTAMP, EntryExitTime, Vehicle_REN, Vehicle_RID, Vehicle_RMA, isEntry, EntryExit, Depo_REN, Depo_RID, Depo_RMA) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)");
 						  //statement.setTimestamp(1, new Timestamp(System.currentTimeMillis()));
 					 
 						   PreparedStatement IDStatement = connection.prepareStatement("SELECT NEXT VALUE FOR BAS_IDGEN_SEQ");
@@ -589,19 +591,24 @@ public class UtilityImpl {
 						  statement.executeUpdate();
 						 } catch (SQLException ex) {
 						  ex.printStackTrace();
-						 } catch (ClassNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+						 } 
 		  } 
 		  
 		  
 		  
 		  public void setSourceOutDestinationInDB(LocationDTO lDTO) {
-			  System.out.println("IN BACKEND====>"); 
-			  try (Connection connection = DBConnection.getConnection();
+			  System.out.println("IN BACKEND====>");
+					 
+			
+			  try {
+				  
+				     DBConnection db = DBConnection.getInstance();
+			         System.out.println("db:"+db);
+				     Connection connection = db.getConnection();
+				     System.out.println("connection:"+connection);
+			  
 					  PreparedStatement SourceStatement = 
-					  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS StartLat, m.Longitude AS StartLng, d.Radius, d.EventType, d.numberOfVertices, d.polygonVertices from VEHICLE v join Geofence d on v.StartDepo_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?")) {
+					  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS StartLat, m.Longitude AS StartLng, d.Radius, d.EventType, d.numberOfVertices, d.polygonVertices from VEHICLE v join Geofence d on v.StartDepo_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?");
 					  
 				      SourceStatement.setString(1,lDTO.getId());
 				     					 
@@ -687,7 +694,8 @@ public class UtilityImpl {
 			          
 			          }
 			          
-			          			          
+			         
+			                    
 			          PreparedStatement EndStatement = 
 							  connection.prepareStatement("select v.id AS vehicleID, d.id AS depotID, m.ID AS Location_RID, m.Latitude AS EndLat, m.Longitude AS EndLng, d.Radius, d.EventType, d.numberOfVertices, d.polygonVertices from VEHICLE v join Geofence d on v.EndDepot_RID=d.ID left join MGeoLocation m on m.id = d.Location_RID where v.id=?");
 			          
@@ -763,19 +771,13 @@ public class UtilityImpl {
 			          
 			        	  
 			        	  
-			          }
-			          
-			          
-			          
+			          }        
 			          
 			          
 				          
 			  		}catch (SQLException ex) {
 						  ex.printStackTrace();
-					} catch (ClassNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-					}	
+					} 
 			  		
 			  
 			  

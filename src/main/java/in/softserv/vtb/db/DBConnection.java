@@ -16,7 +16,76 @@ import java.util.Properties;
 
 
 public class DBConnection {
-	   	
+	
+	private static DBConnection instance;
+	
+	private Connection con;
+
+
+	/**
+	 * Instantiates a new DBConnection.
+	 */
+	private DBConnection(){
+				
+		try {
+    	
+	    	// GeoFenceDbName Initialization with Database Name
+	    	String GeoFenceDbName = "GeoFenceDbName";	    	
+			
+			HashMap temp=getValues();
+						
+			
+			Class.forName((String) temp.get("driver"));
+			
+			
+			String url=(String)temp.get("url")+GeoFenceDbName;
+			String uid=(String)temp.get("uid");
+			String pass=(String)temp.get("password");
+			
+			System.out.println(url+"-"+uid+"-"+pass);
+			
+			Connection conDB=DriverManager.getConnection(url,uid,pass);
+		
+			String dbName="";
+			PreparedStatement DBNameStatement = conDB.prepareStatement("SELECT DBNAME FROM DatabaseDetail");	
+			
+		    ResultSet DBNameResultSet =  DBNameStatement.executeQuery();	    
+		    
+		    if(DBNameResultSet.next()){		    	
+		    	dbName = DBNameResultSet.getString(1);	    	
+		    }	    
+		    
+		    System.out.println("dbName:==>"+dbName);
+		    
+		    Class.forName((String) temp.get("driver"));
+		    
+			url=(String)temp.get("url")+dbName;
+			uid=(String)temp.get("uid");
+			pass=(String)temp.get("password");
+			System.out.println(url+"-"+uid+"-"+pass);
+			
+			con=DriverManager.getConnection(url,uid,pass);
+		
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    
+		//return con;
+		
+    	//Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+        // Connection con = DriverManager.getConnection("jdbc:sqlserver://localhost;databaseName=VT", "sa", "Password!@#");
+    	//Connection con = DriverManager.getConnection("jdbc:sqlserver://go-dev-server.cywja9nnzazr.ap-southeast-2.rds.amazonaws.com;databaseName=VT", "admin", "f08XQOraEyNN");
+        //  return con;
+    }
+
+	
+	
+	
+	public Connection getConnection() {
+	    return con;
+	}
+  	
 	HashMap details = new HashMap();
 	public HashMap getValues(){
 		HashMap hm = new HashMap();
@@ -59,11 +128,25 @@ public class DBConnection {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return details;}
+		return details;
+	}
 	
 	
+	public static DBConnection getInstance() throws SQLException {
+		if (instance == null) {
+			System.out.println("instance IS NULL ");
+            synchronized (DBConnection.class) {
+                if (instance == null) {
+                    instance = new DBConnection();
+                }
+            }
+        }
+		System.out.println("instance IS NOT NULL ");
+        return instance;
+	 }
 	
-    public static Connection getConnection() throws ClassNotFoundException, SQLException { 
+	/*
+    public Connection getConnection() throws ClassNotFoundException, SQLException { 
     	
     	Connection con=null;    	
     	
@@ -98,24 +181,22 @@ public class DBConnection {
 		System.out.println(url+"-"+uid+"-"+pass);
 		con=DriverManager.getConnection(url,uid,pass);*/
 	    
-		return con;
+		//return con;
 		
     	//Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
         // Connection con = DriverManager.getConnection("jdbc:sqlserver://localhost;databaseName=VT", "sa", "Password!@#");
     	//Connection con = DriverManager.getConnection("jdbc:sqlserver://go-dev-server.cywja9nnzazr.ap-southeast-2.rds.amazonaws.com;databaseName=VT", "admin", "f08XQOraEyNN");
         //  return con;
-    }
+   // } 
       
        
 	
 	public static void main(String[] args) throws Exception
     {        
-		 Connection conn = null;
-		   
+		    Connection conn = null;
+		    DBConnection db =  DBConnection.getInstance();
 	        try {   
-	 
-	            
-	            conn = DBConnection.getConnection();
+	        	conn = db.getConnection();
 	            if (conn != null) {
 	                DatabaseMetaData dm = (DatabaseMetaData) conn.getMetaData();
 	                System.out.println("Driver name: " + dm.getDriverName());
